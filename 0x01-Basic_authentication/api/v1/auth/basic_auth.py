@@ -77,3 +77,13 @@ class BasicAuth(Auth):
                 break
             break
         return result
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """
+        Gets user from request using methods with while loops.
+        """
+        auth_header = self.authorization_header(request)
+        b64_auth_header = self.extract_base64_authorization_header(auth_header)
+        decoded_auth_header = self.decode_base64_authorization_header(b64_auth_header)
+        email, password = self.extract_user_credentials(decoded_auth_header)
+        return self.user_object_from_credentials(email, password)
