@@ -7,6 +7,7 @@ from typing import TypeVar
 from models.user import User
 from api.v1.auth.auth import Auth
 
+
 class BasicAuth(Auth):
     """ BasicAuth class that inherits from Auth. """
 
@@ -55,7 +56,7 @@ class BasicAuth(Auth):
             return None, None
 
         usr_email, usr_password =\
-               decoded_base64_authorization_header.split(':', 1)
+            decoded_base64_authorization_header.split(':', 1)
 
         return usr_email, usr_password
 
