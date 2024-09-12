@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """DB module
 """
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, tuple_
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
-from user import Base
+from user import Base, User
 
 
 class DB:
@@ -43,3 +45,49 @@ class DB:
             except Exception:
                 self._session.rollback()
         return new_user
+
+    def find_user_by(self, **kwargs) -> User:
+        """Based on given filters, find user.
+        """
+        fields, vals = [], []
+        for key, value in kwargs.items():
+            if hasattr(User, key):
+                fields.append(getattr(User, key))
+                vals.append(value)
+            else:
+                raise InvalidRequestError()
+        result = None
+        while True:
+            try:
+                result = self._session.query(User).filter(
+                    tuple_(*fields).in_([tuple(vals)])
+                ).first()
+                break
+            except NoResultFound:
+                break
+        if result is None:
+            raise NoResultFound()
+        return result
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Update user details via id.
+        """
+        user = self.find_user_by(id=user_id)
+        if user is None:
+            return
+        update_info = {}
+        for key, value in kwargs.items():
+            if hasattr(User, key):
+                update_info[getattr(User, key)] = value
+            else:
+                raise ValueError()
+        while True:
+            try:
+                self._session.query(User).filter(User.id == user_id).update(
+                    update_info,
+                    synchronize_session=False,
+                )
+                self._session.commit()
+                break
+            except Exception:
+                self._session.rollback()
