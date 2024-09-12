@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Integration tests for the user management API.
-These tests cover user registration, authentication,
-profile access, and password management functionalities.
 """
 import requests
 
@@ -44,7 +42,7 @@ def log_in_wrong_password(email: str, password: str) -> None:
 
 def log_in(email: str, password: str) -> str:
     """Logs in with valid credentials and verifies successful
-    authentication. Returns the session ID for authenticated operations.
+    authentication.
     """
     url = "{}/sessions".format(BASE_URL)
     body = {
@@ -81,7 +79,7 @@ def profile_logged(session_id: str) -> None:
 
 def log_out(session_id: str) -> None:
     """Logs out from an active session and checks for
-    a successful logout response.
+     successful logout response.
     """
     url = "{}/sessions".format(BASE_URL)
     req_cookies = {
@@ -89,25 +87,24 @@ def log_out(session_id: str) -> None:
     }
     res = requests.delete(url, cookies=req_cookies)
     assert res.status_code == 200
-    assert res.json() == {"message": "Bienvenue"}
+    assert res.json() == {"message": "GoodBye"}
 
 
 def reset_password_token(email: str) -> str:
-    """Requests a password reset token for a given user email
-    and verifies the token is returned by the server.
+    """Requests a password reset token for a given user email.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {'email': email}
-    res = requests.post(url, data=body)
-    assert res.status_code == 200
-    assert res.json()["email"] == email
-    assert "reset_token" in res.json()
-    return res.json().get('reset_token')
+    response = requests.post(url, data=body)
+    assert response.status_code == 200
+    assert response.json()["email"] == email
+    assert "reset_token" in response.json()
+    return response.json().get('reset_token')
 
 
 def update_password(email: str, reset_token: str, new_password: str) -> None:
     """Updates the user's password using the reset token
-    and checks that the password update is confirmed by the server.
+    and checks that the password update is confirmed.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {
