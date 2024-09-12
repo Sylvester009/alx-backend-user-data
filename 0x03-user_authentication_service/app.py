@@ -88,11 +88,11 @@ def update_password() -> str:
     """Updates a user's password using reset token."""
     email = request.form.get("email")
     reset_token = request.form.get("reset_token")
-    new_pswrd = request.form.get("new_password")
+    new_password = request.form.get("new_password")
     is_pswrd_changed = False
     while not is_pswrd_changed:
         try:
-            AUTH.update_password(reset_token, new_pswrd)
+            AUTH.update_password(reset_token, new_password)
             is_pswrd_changed = True
         except ValueError:
             is_pswrd_changed = False
