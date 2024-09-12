@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module for interacting with a database.
+"""DB module
 """
 from sqlalchemy import create_engine, tuple_
 from sqlalchemy.exc import InvalidRequestError
@@ -33,7 +33,7 @@ class DB:
         return self.__session
 
     def add_user(self, email: str, hashed_password: str) -> User:
-        """Add a new user to the database.
+        """Add new user to the database.
         """
         new_user = None
         while True:
@@ -47,20 +47,20 @@ class DB:
         return new_user
 
     def find_user_by(self, **kwargs) -> User:
-        """Find a user based on given filters.
+        """Based on given filters, find user.
         """
-        fields, values = [], []
+        fields, vals = [], []
         for key, value in kwargs.items():
             if hasattr(User, key):
                 fields.append(getattr(User, key))
-                values.append(value)
+                vals.append(value)
             else:
                 raise InvalidRequestError()
         result = None
         while True:
             try:
                 result = self._session.query(User).filter(
-                    tuple_(*fields).in_([tuple(values)])
+                    tuple_(*fields).in_([tuple(vals)])
                 ).first()
                 break
             except NoResultFound:
@@ -70,21 +70,21 @@ class DB:
         return result
 
     def update_user(self, user_id: int, **kwargs) -> None:
-        """Update user details based on the given id.
+        """Update user details via id.
         """
         user = self.find_user_by(id=user_id)
         if user is None:
             return
-        update_source = {}
+        update_info = {}
         for key, value in kwargs.items():
             if hasattr(User, key):
-                update_source[getattr(User, key)] = value
+                update_info[getattr(User, key)] = value
             else:
                 raise ValueError()
         while True:
             try:
                 self._session.query(User).filter(User.id == user_id).update(
-                    update_source,
+                    update_info,
                     synchronize_session=False,
                 )
                 self._session.commit()
